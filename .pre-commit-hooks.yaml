@@ -6,5 +6,5 @@
     'files': \.(fs|fsi|fsx)$
     args: []
     require_serial: false
-    additional_dependencies: ["fantomas:1.1.0"]
+    additional_dependencies: ["fantomas:1.2.0"]
     minimum_pre_commit_version: '0'
