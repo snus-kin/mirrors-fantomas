@@ -1,0 +1,10 @@
+-   id: fantomas
+    name: fantomas
+    description: 'F# source code formatter'
+    entry: fantomas
+    language: dotnet
+    'files': \.(fs|fsi|fsx)$
+    args: []
+    require_serial: false
+    additional_dependencies: ["fantomas:0.8.0"]
+    minimum_pre_commit_version: '0'
