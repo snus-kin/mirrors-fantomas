@@ -1,0 +1,77 @@
+name: Update mirror
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install mirror maker
+        run: pip install git+https://github.com/snus-kin/dotnet-pre-commit-mirror-maker.git
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Record current HEAD
+        id: before
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Run mirror maker
+        run: |
+          dotnet-pre-commit-mirror . \
+            --language dotnet \
+            --package-name fantomas \
+            --entry fantomas \
+            --description 'F# source code formatter' \
+            --files-regex '\.(fs|fsi|fsx)$'
+
+      - name: Check for new versions
+        id: check
+        run: |
+          if [ "$(git rev-parse HEAD)" != "${{ steps.before.outputs.sha }}" ]; then
+            echo "updated=true" >> "$GITHUB_OUTPUT"
+            echo "version=$(cat .version)" >> "$GITHUB_OUTPUT"
+          else
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update README
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          VERSION="${{ steps.check.outputs.version }}"
+          python - <<'EOF'
+          import os, re, pathlib
+          version = os.environ['VERSION']
+          path = pathlib.Path('README.md')
+          text = path.read_text()
+          text = re.sub(r'(?m)^Current version: \*\*.*?\*\*$', f'Current version: **{version}**', text)
+          text = re.sub(r'(?m)^    rev: v[\d.]+$', f'    rev: v{version}', text)
+          path.write_text(text)
+          EOF
+          git add README.md
+          git commit -m "Update README for v$VERSION"
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+
+      - name: Push commits and tags
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          git push origin HEAD:master
+          git push origin --tags
