@@ -1,13 +1,19 @@
 # [prek](https://github.com/j178/prek) hook for fantomas
 
-please note you cannot use this hook with pre-commit as it does not support dotnet additional-deps
+> **Note:** this hook requires `additional_dependencies` which pre-commit does not support for dotnet — use [prek](https://github.com/j178/prek) instead.
 
+Current version: **7.0.5**
 
-example config:
+## Usage
+
 ```yaml
-  - repo: https://github.com/snus-kin/mirros-fantomas
+  - repo: https://github.com/snus-kin/mirrors-fantomas
     rev: v7.0.5
     hooks:
       - id: fantomas
         name: Fantomas
 ```
+
+## How it works
+
+A daily GitHub Actions workflow checks NuGet for new stable Fantomas releases. When a new version is found, it commits updated hook files and a new `v{version}` tag — so pinning to a tag always gives you an exact, reproducible install.
