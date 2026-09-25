@@ -2,13 +2,13 @@
 
 > **Note:** this hook requires `additional_dependencies` which pre-commit does not support for dotnet — use [prek](https://github.com/j178/prek) instead.
 
-Current version: **8.0.4**
+Current version: **8.0.5**
 
 ## Usage
 
 ```yaml
   - repo: https://github.com/snus-kin/mirrors-fantomas
-    rev: v8.0.4
+    rev: v8.0.5
     hooks:
       - id: fantomas
         name: Fantomas
